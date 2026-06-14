@@ -1,0 +1,28 @@
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = 'nosniff'
+    Referrer-Policy = 'no-referrer, strict-origin-when-cross-origin'
+    Permissions-Policy = 'geolocation=(), vibrate=(), payment=(), autoplay=(self)'
+
+    #  Multi-value headers are expressed with multi-line strings
+    cache-control = '''
+    max-age=31536000,
+    no-cache,
+    no-store,
+    must-revalidate'''
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+  
+[functions]
+  # Tell Netlify not to look inside or bundle this directory
+  ignored_node_modules = ["cloudFunctions"]
+  included_files = ["!cloudFunctions/**"]
