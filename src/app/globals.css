@@ -909,7 +909,8 @@ footer {
   font-family: var(--f-serif);
   font-weight: 300;
   font-size: clamp(3.5rem, 8vw, 9rem);
-  line-height: 0.9;
+  line-height: 1.1;
+  /* line-height: 0.9; */
 }
 .pg-title-dark {
   color: var(--bg);
