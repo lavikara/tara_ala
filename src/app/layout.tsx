@@ -3,7 +3,8 @@ import "./globals.css";
 
 const SITE_URL = "https://www.taraala.com";
 const SITE_NAME = "Tara Ala";
-const DEFAULT_OG_IMAGE = "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200&q=85&auto=format&fit=crop";
+const DEFAULT_OG_IMAGE =
+  "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200&q=85&auto=format&fit=crop";
 
 export const viewport: Viewport = {
   themeColor: "#1C1914",
@@ -170,7 +171,13 @@ export default function RootLayout({
                 priceRange: "£££",
                 openingHoursSpecification: {
                   "@type": "OpeningHoursSpecification",
-                  dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                  dayOfWeek: [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                  ],
                   opens: "09:00",
                   closes: "18:00",
                 },
