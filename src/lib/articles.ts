@@ -369,3 +369,31 @@ export function getArticleBySlug(slug: string): Article | undefined {
 export function getRelatedArticles(currentSlug: string, count = 3): Article[] {
   return articles.filter((a) => a.slug !== currentSlug).slice(0, count);
 }
+
+// ── Async data fetchers (simulate network latency) ────────────────────────
+// In production, replace the delay with a real CMS/API call (e.g. Contentful,
+// Sanity, or a database query). The artificial wait ensures loading.tsx fires.
+
+const SIMULATED_DELAY_MS = 1800;
+
+function delay(ms: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}
+
+export async function fetchArticles(): Promise<Article[]> {
+  await delay(SIMULATED_DELAY_MS);
+  return articles;
+}
+
+export async function fetchArticleBySlug(slug: string): Promise<Article | undefined> {
+  await delay(SIMULATED_DELAY_MS);
+  return articles.find((a) => a.slug === slug);
+}
+
+export async function fetchRelatedArticles(
+  currentSlug: string,
+  count = 3
+): Promise<Article[]> {
+  await delay(SIMULATED_DELAY_MS);
+  return articles.filter((a) => a.slug !== currentSlug).slice(0, count);
+}

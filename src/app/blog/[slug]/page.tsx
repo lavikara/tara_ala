@@ -7,30 +7,29 @@ import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import {
   articles,
-  getArticleBySlug,
-  getRelatedArticles,
+  fetchArticleBySlug,
+  fetchRelatedArticles,
 } from "../../../lib/articles";
 import type { ArticleSection } from "../../../lib/articles";
 
 const SITE_URL = "https://www.taraala.com";
 
-// ── Static generation ──────────────────────────────────────────────────────
+// ── Static params (still pre-render the shell; data fetches at runtime) ────
 export function generateStaticParams() {
   return articles.map((a) => ({ slug: a.slug }));
 }
 
-// ── Per-page metadata ──────────────────────────────────────────────────────
+// ── Per-page metadata (uses sync helper — metadata runs before Suspense) ──
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = articles.find((a) => a.slug === slug);
   if (!article) return { title: "Article not found" };
 
   const url = `${SITE_URL}/blog/${article.slug}`;
-
   return {
     title: article.title,
     description: article.excerpt,
@@ -53,12 +52,7 @@ export async function generateMetadata({
       authors: ["Tara Ala"],
       tags: [article.tag],
       images: [
-        {
-          url: article.imgWide,
-          width: 1400,
-          height: 788,
-          alt: article.alt,
-        },
+        { url: article.imgWide, width: 1400, height: 788, alt: article.alt },
       ],
     },
     twitter: {
@@ -70,12 +64,12 @@ export async function generateMetadata({
   };
 }
 
-// ── Body renderer ─────────────────────────────────────────────────────────
+// ── Body renderer ──────────────────────────────────────────────────────────
 function RenderBody({ sections }: { sections: ArticleSection[] }) {
   return (
     <>
       {sections.map((s, i) => {
-        if (s.type === "p") {
+        if (s.type === "p")
           return i === 0 ? (
             <p key={i} className="prose-intro">
               {s.text}
@@ -85,7 +79,6 @@ function RenderBody({ sections }: { sections: ArticleSection[] }) {
               {s.text}
             </p>
           );
-        }
         if (s.type === "h2")
           return (
             <h2 key={i} className="prose-h2">
@@ -98,7 +91,7 @@ function RenderBody({ sections }: { sections: ArticleSection[] }) {
               {s.text}
             </h3>
           );
-        if (s.type === "quote") {
+        if (s.type === "quote")
           return (
             <blockquote key={i} className="prose-quote">
               <span className="prose-quote-text">&ldquo;{s.text}&rdquo;</span>
@@ -109,8 +102,7 @@ function RenderBody({ sections }: { sections: ArticleSection[] }) {
               )}
             </blockquote>
           );
-        }
-        if (s.type === "ul") {
+        if (s.type === "ul")
           return (
             <ul key={i} className="prose-ul">
               {s.items.map((item, j) => (
@@ -118,7 +110,6 @@ function RenderBody({ sections }: { sections: ArticleSection[] }) {
               ))}
             </ul>
           );
-        }
         return null;
       })}
     </>
@@ -126,18 +117,26 @@ function RenderBody({ sections }: { sections: ArticleSection[] }) {
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────
+// force-dynamic ensures the page suspends at runtime so loading.tsx fires
+export const dynamic = "force-dynamic";
+
 export default async function ArticlePage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+
+  // Both awaits run in parallel — the page suspends until both resolve,
+  // showing loading.tsx the whole time.
+  const [article, related] = await Promise.all([
+    fetchArticleBySlug(slug),
+    fetchRelatedArticles(slug),
+  ]);
+
   if (!article) notFound();
 
-  const related = getRelatedArticles(article.slug);
   const titleWords = article.title.split(" ");
-  // Split title into up to 3 lines for the animated hero
   const third = Math.ceil(titleWords.length / 3);
   const titleLines = [
     titleWords.slice(0, third).join(" "),
@@ -160,11 +159,7 @@ export default async function ArticlePage({
             description: article.excerpt,
             datePublished: article.dateISO,
             dateModified: article.dateISO,
-            author: {
-              "@type": "Person",
-              name: "Tara Ala",
-              url: SITE_URL,
-            },
+            author: { "@type": "Person", name: "Tara Ala", url: SITE_URL },
             publisher: {
               "@type": "Organization",
               name: "Tara Ala",
@@ -206,7 +201,6 @@ export default async function ArticlePage({
             {titleLines.map((line, i) => (
               <span className="row" key={i}>
                 <span
-                  className={`r${i + 1}`}
                   style={{
                     display: "block",
                     opacity: 0,
@@ -242,7 +236,7 @@ export default async function ArticlePage({
           <div className="art-byline">
             <div className="art-byline-avatar">
               <Image
-                src={`https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=104&q=80&auto=format&fit=crop&crop=faces`}
+                src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=104&q=80&auto=format&fit=crop&crop=faces"
                 alt="Tara Ala"
                 width={52}
                 height={52}
@@ -257,7 +251,6 @@ export default async function ArticlePage({
             </div>
           </div>
 
-          {/* Share / back */}
           <div
             style={{
               display: "flex",
