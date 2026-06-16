@@ -12,6 +12,7 @@ export default function Footer() {
           <Link href="/services">Services</Link>
           <Link href="/work">Work</Link>
           <Link href="/blog">Blog</Link>
+          <Link href="/contact">Contact</Link>
         </nav>
       </div>
       <div className="ft-bot">
