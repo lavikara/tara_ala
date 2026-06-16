@@ -4,7 +4,7 @@ import Link from "next/link";
 import ClientShell from "../../components/ClientShell";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { articles } from "../../lib/articles";
+import { fetchArticles } from "../../lib/articles";
 
 export const metadata: Metadata = {
   title: "Journal — Style Intelligence, Considered Dressing & Fashion Insight",
@@ -48,9 +48,16 @@ export const metadata: Metadata = {
   },
 };
 
-const [featured, ...rest] = articles;
+// Opt out of static generation so the page actually suspends at runtime
+// and loading.tsx is shown while fetchArticles() resolves.
+export const dynamic = "force-dynamic";
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  // This await is what triggers loading.tsx — the page suspends here
+  // until fetchArticles() resolves (after the simulated delay).
+  const allArticles = await fetchArticles();
+  const [featured, ...rest] = allArticles;
+
   return (
     <ClientShell>
       <Navbar />
@@ -71,7 +78,7 @@ export default function BlogPage() {
               name: "Tara Ala",
               url: "https://www.taraala.com",
             },
-            blogPost: articles.map((a) => ({
+            blogPost: allArticles.map((a) => ({
               "@type": "BlogPosting",
               headline: a.title,
               description: a.excerpt,
@@ -139,7 +146,7 @@ export default function BlogPage() {
         </article>
       </Link>
 
-      {/* Grid */}
+      {/* Article grid */}
       <div className="bl-grid">
         {rest.map((a) => (
           <Link
